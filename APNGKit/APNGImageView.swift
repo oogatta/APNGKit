@@ -107,6 +107,7 @@ open class APNGImageView: APNGView {
     }
 
     var timer: GCDTimer?
+    var displaylink: CADisplayLink?
     var lastTimestamp: TimeInterval = 0
     var currentPassedDuration: TimeInterval = 0
     var currentFrameDuration: TimeInterval = 0
@@ -216,11 +217,13 @@ open class APNGImageView: APNGView {
         }
         
         isAnimating = true
-        timer = GCDTimer(intervalInSecs: 0.016)
-        timer!.Event = { [weak self] in
-            DispatchQueue.main.sync { self?.tick() }
-        }
-        timer!.start()
+//        timer = GCDTimer(intervalInSecs: 0.016)
+//        timer!.Event = { [weak self] in
+//            DispatchQueue.main.sync { self?.tick() }
+//        }
+//        timer!.start()
+        displaylink = CADisplayLink(target: self, selector: #selector(tick))
+        displaylink?.add(to: .current, forMode: .defaultRunLoopMode)
     }
     
     /**
@@ -246,7 +249,9 @@ open class APNGImageView: APNGView {
         currentFrameDuration = 0
         currentFrameIndex = 0
         
-        timer = nil
+//        timer = nil
+        displaylink?.invalidate()
+        displaylink = nil
     }
     
     /**
@@ -273,7 +278,7 @@ open class APNGImageView: APNGView {
         #endif
     }
     
-    func tick() {
+    @objc func tick() {
         guard let image = image else {
             return
         }
